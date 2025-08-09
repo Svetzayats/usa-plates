@@ -212,7 +212,8 @@ function openFilePicker(context) {
 }
 
 async function handleSelectedFile(file, context) {
-  const resizedBlob = await resizeImage(file, 1600);
+  const normalizedBlob = await convertHeicIfNeeded(file);
+  const resizedBlob = await resizeImage(normalizedBlob, 1600);
 
   if (context === "state" && currentModalStateCode) {
     await setStatePhoto(currentModalStateCode, resizedBlob);
@@ -362,6 +363,33 @@ function resizeImage(file, maxDimension) {
     };
     reader.readAsDataURL(file);
   });
+}
+
+// HEIC/HEIF conversion
+async function convertHeicIfNeeded(file) {
+  const lowerType = (file.type || "").toLowerCase();
+  const heicLike =
+    lowerType.includes("heic") ||
+    lowerType.includes("heif") ||
+    /\.hei[cf]$/i.test(file.name || "");
+  if (!heicLike) return file;
+  try {
+    if (typeof window.heic2any === "function") {
+      const result = await window.heic2any({
+        blob: file,
+        toType: "image/jpeg",
+        quality: 0.92,
+      });
+      // heic2any can return a Blob or an array of Blobs
+      const blob = Array.isArray(result) ? result[0] : result;
+      return new File([blob], (file.name || "photo") + ".jpg", {
+        type: "image/jpeg",
+      });
+    }
+  } catch (_) {
+    // Fallback to original if conversion fails
+  }
+  return file;
 }
 
 // IndexedDB layer
