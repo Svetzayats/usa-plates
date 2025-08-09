@@ -51,7 +51,17 @@
       </nav>
 
       <section id="statesView" role="tabpanel" aria-labelledby="tabStates">
-        <div id="statesGrid" class="grid"></div>
+        <div class="search">
+          <label for="stateSearch" class="sr-only">Search states</label>
+          <input
+            id="stateSearch"
+            type="search"
+            placeholder="Search state or code"
+            autocomplete="off"
+            inputmode="search"
+          />
+        </div>
+        <div id="statesGrid" class="grid" aria-live="polite"></div>
       </section>
 
       <section

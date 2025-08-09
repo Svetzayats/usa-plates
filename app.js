@@ -17,14 +17,18 @@ async function initializeApp() {
   appDatabase = await openDatabase();
 
   renderTabs();
+  setupSearch();
   renderStatesGrid(getStates());
   await refreshStatesProgress();
   await renderGallery();
 
   const addGalleryPhotoBtn = document.getElementById("addGalleryPhotoBtn");
-  addGalleryPhotoBtn.addEventListener("click", function handleAddGalleryClick() {
-    openFilePicker("gallery");
-  });
+  addGalleryPhotoBtn.addEventListener(
+    "click",
+    function handleAddGalleryClick() {
+      openFilePicker("gallery");
+    }
+  );
 }
 
 // PWA
@@ -40,11 +44,14 @@ async function setupServiceWorker() {
 
 function setupInstallPrompt() {
   const installBtn = document.getElementById("installBtn");
-  window.addEventListener("beforeinstallprompt", function onBeforeInstallPrompt(event) {
-    event.preventDefault();
-    deferredInstallPrompt = event;
-    installBtn.classList.remove("hidden");
-  });
+  window.addEventListener(
+    "beforeinstallprompt",
+    function onBeforeInstallPrompt(event) {
+      event.preventDefault();
+      deferredInstallPrompt = event;
+      installBtn.classList.remove("hidden");
+    }
+  );
   installBtn.addEventListener("click", async function onInstallClick() {
     if (!deferredInstallPrompt) return;
     deferredInstallPrompt.prompt();
@@ -152,7 +159,8 @@ async function openStateModal(state) {
   const backdrop = document.getElementById("modalBackdrop");
 
   modalTitle.textContent = `Add plate photo — ${state.name}`;
-  modalPreview.innerHTML = "<span class='muted'>No photo yet</span>";
+  modalPreview.innerHTML = "";
+  modalPreview.classList.remove("has-image");
 
   const existing = await getStatePhoto(state.code);
   if (existing && existing.blob) {
@@ -160,12 +168,16 @@ async function openStateModal(state) {
     img.src = URL.createObjectURL(existing.blob);
     img.alt = `${state.name} plate photo`;
     img.className = "thumb";
-    modalPreview.innerHTML = "";
     modalPreview.appendChild(img);
+    modalPreview.classList.add("has-image");
   }
 
-  function onReplace() { openFilePicker("state"); }
-  function onClose() { closeModal(); }
+  function onReplace() {
+    openFilePicker("state");
+  }
+  function onClose() {
+    closeModal();
+  }
 
   replaceBtn.addEventListener("click", onReplace, { once: true });
   closeBtn.addEventListener("click", onClose, { once: true });
@@ -204,7 +216,9 @@ async function handleSelectedFile(file, context) {
     await setStatePhoto(currentModalStateCode, resizedBlob);
 
     // Update UI
-    const card = document.querySelector(`[data-state-code="${currentModalStateCode}"]`);
+    const card = document.querySelector(
+      `[data-state-code="${currentModalStateCode}"]`
+    );
     if (card) await updateCardWithPhoto(card, currentModalStateCode);
     await refreshStatesProgress();
     closeModal();
@@ -239,6 +253,25 @@ async function renderGallery() {
     wrap.appendChild(img);
     grid.appendChild(wrap);
   }
+}
+
+// Search
+function setupSearch() {
+  const input = document.getElementById("stateSearch");
+  const allStates = getStates();
+  input.addEventListener("input", function onSearch() {
+    const q = input.value.trim().toLowerCase();
+    if (!q) {
+      renderStatesGrid(allStates);
+      return;
+    }
+    const filtered = allStates.filter(function filterState(s) {
+      return (
+        s.name.toLowerCase().includes(q) || s.code.toLowerCase().includes(q)
+      );
+    });
+    renderStatesGrid(filtered);
+  });
 }
 
 // Data: States
@@ -293,7 +326,7 @@ function getStates() {
     { code: "WA", name: "Washington" },
     { code: "WV", name: "West Virginia" },
     { code: "WI", name: "Wisconsin" },
-    { code: "WY", name: "Wyoming" }
+    { code: "WY", name: "Wyoming" },
   ];
 }
 
@@ -304,7 +337,10 @@ function resizeImage(file, maxDimension) {
     reader.onload = function onLoad() {
       const img = new Image();
       img.onload = function onImgLoad() {
-        const ratio = Math.min(1, maxDimension / Math.max(img.width, img.height));
+        const ratio = Math.min(
+          1,
+          maxDimension / Math.max(img.width, img.height)
+        );
         const targetW = Math.round(img.width * ratio);
         const targetH = Math.round(img.height * ratio);
         const canvas = document.createElement("canvas");
@@ -312,7 +348,13 @@ function resizeImage(file, maxDimension) {
         canvas.height = targetH;
         const ctx = canvas.getContext("2d");
         ctx.drawImage(img, 0, 0, targetW, targetH);
-        canvas.toBlob(function toBlob(blob) { resolve(blob || file); }, "image/jpeg", 0.85);
+        canvas.toBlob(
+          function toBlob(blob) {
+            resolve(blob || file);
+          },
+          "image/jpeg",
+          0.85
+        );
       };
       img.src = String(reader.result);
     };
@@ -330,11 +372,18 @@ async function openDatabase() {
         db.createObjectStore("statePhotos", { keyPath: "stateCode" });
       }
       if (!db.objectStoreNames.contains("galleryPhotos")) {
-        db.createObjectStore("galleryPhotos", { keyPath: "id", autoIncrement: true });
+        db.createObjectStore("galleryPhotos", {
+          keyPath: "id",
+          autoIncrement: true,
+        });
       }
     };
-    request.onerror = function onError() { reject(request.error); };
-    request.onsuccess = function onSuccess() { resolve(request.result); };
+    request.onerror = function onError() {
+      reject(request.error);
+    };
+    request.onsuccess = function onSuccess() {
+      resolve(request.result);
+    };
   });
 }
 
@@ -343,9 +392,15 @@ function withStore(storeName, mode, callback) {
     const tx = appDatabase.transaction(storeName, mode);
     const store = tx.objectStore(storeName);
     const result = callback(store);
-    tx.oncomplete = function onComplete() { resolve(result); };
-    tx.onerror = function onTxError() { reject(tx.error); };
-    tx.onabort = function onTxAbort() { reject(tx.error); };
+    tx.oncomplete = function onComplete() {
+      resolve(result);
+    };
+    tx.onerror = function onTxError() {
+      reject(tx.error);
+    };
+    tx.onabort = function onTxAbort() {
+      reject(tx.error);
+    };
   });
 }
 
@@ -361,8 +416,12 @@ async function getStatePhoto(stateCode) {
     const tx = appDatabase.transaction("statePhotos", "readonly");
     const store = tx.objectStore("statePhotos");
     const req = store.get(stateCode);
-    req.onsuccess = function onSuccess() { resolve(req.result || null); };
-    req.onerror = function onError() { reject(req.error); };
+    req.onsuccess = function onSuccess() {
+      resolve(req.result || null);
+    };
+    req.onerror = function onError() {
+      reject(req.error);
+    };
   });
 }
 
@@ -371,8 +430,12 @@ async function countStatesWithPhotos() {
     const tx = appDatabase.transaction("statePhotos", "readonly");
     const store = tx.objectStore("statePhotos");
     const req = store.getAllKeys();
-    req.onsuccess = function onSuccess() { resolve((req.result || []).length); };
-    req.onerror = function onError() { reject(req.error); };
+    req.onsuccess = function onSuccess() {
+      resolve((req.result || []).length);
+    };
+    req.onerror = function onError() {
+      reject(req.error);
+    };
   });
 }
 
@@ -394,8 +457,11 @@ async function getAllGalleryPhotos() {
     const tx = appDatabase.transaction("galleryPhotos", "readonly");
     const store = tx.objectStore("galleryPhotos");
     const req = store.getAll();
-    req.onsuccess = function onSuccess() { resolve(req.result || []); };
-    req.onerror = function onError() { reject(req.error); };
+    req.onsuccess = function onSuccess() {
+      resolve(req.result || []);
+    };
+    req.onerror = function onError() {
+      reject(req.error);
+    };
   });
 }
-
