@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#ffffff" />
+    <title>Collecting Photos of USA Plates</title>
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" type="image/svg+xml" href="assets/icons/icon-192.svg" />
+    <link rel="apple-touch-icon" href="assets/icons/icon-192.svg" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <div class="title">Collecting Photos of USA Plates</div>
+      <button
+        id="installBtn"
+        class="btn btn-primary hidden"
+        aria-label="Install app"
+      >
+        Install
+      </button>
+    </header>
+
+    <main class="container">
+      <section class="stats" aria-live="polite">
+        <div class="stat-item">
+          <span class="stat-number" id="statesCount">0</span
+          ><span class="stat-label">States collected</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number" id="statesTotal">/ 50</span
+          ><span class="stat-label">Total states</span>
+        </div>
+      </section>
+
+      <nav class="tabs" role="tablist">
+        <button
+          id="tabStates"
+          role="tab"
+          aria-selected="true"
+          class="tab active"
+        >
+          States
+        </button>
+        <button id="tabGallery" role="tab" aria-selected="false" class="tab">
+          Gallery
+        </button>
+      </nav>
+
+      <section id="statesView" role="tabpanel" aria-labelledby="tabStates">
+        <div id="statesGrid" class="grid"></div>
+      </section>
+
+      <section
+        id="galleryView"
+        role="tabpanel"
+        aria-labelledby="tabGallery"
+        class="hidden"
+      >
+        <div class="gallery-actions">
+          <button id="addGalleryPhotoBtn" class="btn btn-secondary">
+            Add fun plate
+          </button>
+        </div>
+        <div id="galleryGrid" class="grid grid-gallery"></div>
+      </section>
+    </main>
+
+    <div
+      id="modal"
+      class="modal hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modalTitle"
+    >
+      <div class="modal-backdrop" id="modalBackdrop"></div>
+      <div class="modal-content">
+        <h2 id="modalTitle" class="modal-title">Add plate photo</h2>
+        <div class="modal-body">
+          <div id="modalPreview" class="modal-preview"></div>
+        </div>
+        <div class="modal-actions">
+          <button id="modalReplaceBtn" class="btn btn-primary">
+            Add / Replace photo
+          </button>
+          <button id="modalCloseBtn" class="btn">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <input
+      id="fileInput"
+      type="file"
+      accept="image/*"
+      capture="environment"
+      class="hidden"
+    />
+
+    <script src="app.js"></script>
+  </body>
+</html>

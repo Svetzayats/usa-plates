@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192">
+  <defs>
+    <linearGradient id="g" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#2563eb"/>
+      <stop offset="100%" stop-color="#60a5fa"/>
+    </linearGradient>
+  </defs>
+  <rect width="192" height="192" rx="24" fill="url(#g)"/>
+  <g fill="#fff" font-family="Segoe UI, Roboto, Arial, sans-serif" font-weight="700" text-anchor="middle">
+    <text x="96" y="88" font-size="42">USA</text>
+    <text x="96" y="130" font-size="26">Plates</text>
+  </g>
+  <rect x="36" y="36" width="120" height="28" rx="6" fill="#ffffff22"/>
+</svg>
+

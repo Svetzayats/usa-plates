@@ -1,0 +1,16 @@
+{
+  "name": "usa-plates-pwa",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Collecting Photos of USA Plates - PWA",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "serve": "node server.js",
+    "ngrok": "node server.js & npx --yes ngrok http 5173 --log=stdout"
+  },
+  "dependencies": {
+    "compression": "^1.7.4",
+    "express": "^4.19.2"
+  }
+}
