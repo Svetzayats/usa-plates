@@ -184,12 +184,14 @@ async function openStateModal(state) {
   backdrop.addEventListener("click", onClose, { once: true });
 
   modal.classList.remove("hidden");
+  document.body.classList.add("no-scroll");
 }
 
 function closeModal() {
   const modal = document.getElementById("modal");
   modal.classList.add("hidden");
   currentModalStateCode = null;
+  document.body.classList.remove("no-scroll");
 }
 
 // File picking
