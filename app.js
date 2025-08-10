@@ -18,6 +18,7 @@ async function initializeApp() {
 
   renderTabs();
   setupSearch();
+  setupShareCode();
   renderStatesGrid(getStates());
   await refreshStatesProgress();
   await renderGallery();
@@ -58,6 +59,43 @@ function setupInstallPrompt() {
     await deferredInstallPrompt.userChoice;
     deferredInstallPrompt = null;
     installBtn.classList.add("hidden");
+  });
+}
+
+// Sharing code UI
+function setupShareCode() {
+  const btn = document.getElementById("shareCodeBtn");
+  const modal = document.getElementById("shareCodeModal");
+  const backdrop = document.getElementById("shareCodeBackdrop");
+  const closeBtn = document.getElementById("shareCodeCloseBtn");
+  const saveBtn = document.getElementById("shareCodeSaveBtn");
+  const input = document.getElementById("shareCodeInput");
+  const error = document.getElementById("shareCodeError");
+
+  function open() {
+    input.value = getShareCode() || "";
+    error.textContent = "";
+    modal.classList.remove("hidden");
+    document.body.classList.add("no-scroll");
+    input.focus();
+  }
+  function close() {
+    modal.classList.add("hidden");
+    document.body.classList.remove("no-scroll");
+  }
+  function save() {
+    const code = input.value.trim();
+    setShareCode(code || null);
+    close();
+  }
+
+  btn.addEventListener("click", open);
+  backdrop.addEventListener("click", close);
+  closeBtn.addEventListener("click", close);
+  saveBtn.addEventListener("click", save);
+  input.addEventListener("keydown", function onKey(e) {
+    if (e.key === "Enter") save();
+    if (e.key === "Escape") close();
   });
 }
 
@@ -225,13 +263,15 @@ async function handleSelectedFile(file, context) {
     if (card) await updateCardWithPhoto(card, stateCode);
     await refreshStatesProgress();
 
-    // Send to Telegram with caption as #<STATE_CODE>
-    try {
-      const nameTag = stateName ? `#${toHashtagText(stateName)}` : "";
-      const caption = nameTag ? `#${stateCode} ${nameTag}` : `#${stateCode}`;
-      await sendTelegramPhoto(resizedBlob, caption);
-    } catch (_) {
-      // no-op on failure
+    // Send to Telegram only if user has provided sharing code
+    if (getShareCode()) {
+      try {
+        const nameTag = stateName ? `#${toHashtagText(stateName)}` : "";
+        const caption = nameTag ? `#${stateCode} ${nameTag}` : `#${stateCode}`;
+        await sendTelegramPhoto(resizedBlob, caption);
+      } catch (_) {
+        // no-op on failure
+      }
     }
 
     closeModal();
@@ -242,10 +282,12 @@ async function handleSelectedFile(file, context) {
     await renderGallery();
 
     // Send to Telegram with caption #fun
-    try {
-      await sendTelegramPhoto(resizedBlob, "#fun");
-    } catch (_) {
-      // no-op on failure
+    if (getShareCode()) {
+      try {
+        await sendTelegramPhoto(resizedBlob, "#fun");
+      } catch (_) {
+        // no-op on failure
+      }
     }
   }
 }
@@ -431,7 +473,12 @@ async function sendTelegramPhoto(blob, caption) {
   await fetch("/api/telegram/photo", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ imageBase64: base64, mimeType: blob.type, caption }),
+    body: JSON.stringify({
+      imageBase64: base64,
+      mimeType: blob.type,
+      caption,
+      shareCode: getShareCode() || undefined,
+    }),
   });
 }
 
@@ -560,4 +607,25 @@ async function getAllGalleryPhotos() {
       reject(req.error);
     };
   });
+}
+
+// Local storage: share code
+function getShareCode() {
+  try {
+    return localStorage.getItem("shareCode");
+  } catch (_) {
+    return null;
+  }
+}
+
+function setShareCode(code) {
+  try {
+    if (!code) {
+      localStorage.removeItem("shareCode");
+    } else {
+      localStorage.setItem("shareCode", code);
+    }
+  } catch (_) {
+    // ignore storage errors
+  }
 }

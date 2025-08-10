@@ -291,6 +291,11 @@ body {
   margin-top: 12px;
 }
 
+.modal .error {
+  color: #b00020;
+  margin-top: 8px;
+}
+
 .thumb {
   width: 100%;
   height: 100%;

@@ -61,6 +61,7 @@ async function handleSendTelegramPhoto(req, res) {
   try {
     const botToken = process.env.TELEGRAM_BOT_TOKEN;
     const chatId = process.env.TELEGRAM_CHAT_ID;
+    const requiredShareCode = process.env.TELEGRAM_SHARING_CODE;
 
     if (!botToken || !chatId) {
       res.status(503).json({
@@ -71,7 +72,11 @@ async function handleSendTelegramPhoto(req, res) {
       return;
     }
 
-    const { imageBase64, mimeType, caption } = req.body || {};
+    const { imageBase64, mimeType, caption, shareCode } = req.body || {};
+    if (requiredShareCode && shareCode !== requiredShareCode) {
+      res.status(403).json({ ok: false, error: "Forbidden" });
+      return;
+    }
     if (!imageBase64 || typeof imageBase64 !== "string") {
       res.status(400).json({ ok: false, error: "imageBase64 is required" });
       return;

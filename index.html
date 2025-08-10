@@ -22,6 +22,9 @@
       >
         Install
       </button>
+      <button id="shareCodeBtn" class="btn" aria-label="Enter sharing code">
+        Sharing code
+      </button>
     </header>
 
     <main class="container">
@@ -97,6 +100,28 @@
             Add / Replace photo
           </button>
           <button id="modalCloseBtn" class="btn">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <div
+      id="shareCodeModal"
+      class="modal hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="shareCodeTitle"
+    >
+      <div class="modal-backdrop" id="shareCodeBackdrop"></div>
+      <div class="modal-content">
+        <h2 id="shareCodeTitle" class="modal-title">Enter sharing code</h2>
+        <div class="modal-body">
+          <label for="shareCodeInput" class="sr-only">Sharing code</label>
+          <input id="shareCodeInput" type="password" placeholder="Enter code" />
+          <div id="shareCodeError" class="error" aria-live="polite"></div>
+        </div>
+        <div class="modal-actions">
+          <button id="shareCodeSaveBtn" class="btn btn-primary">Save</button>
+          <button id="shareCodeCloseBtn" class="btn">Close</button>
         </div>
       </div>
     </div>

@@ -25,6 +25,7 @@ Create a `.env` file in the project root with the following variables to enable 
 - `TELEGRAM_BOT_TOKEN`: Bot token from BotFather.
 - `TELEGRAM_CHAT_ID`: Target chat ID (channel username as `@channelname` or numeric ID for group/channel).
 - `API_JSON_LIMIT` (optional): JSON body limit for uploads, default `20mb`.
+- `TELEGRAM_SHARING_CODE` (optional): If set, only clients that provide this code will be allowed to forward photos to Telegram.
 
 `.env.example`:
 
@@ -47,6 +48,7 @@ Behavior:
 
 - When adding a state photo, the app posts the image with caption `#<STATE_CODE>` (e.g., `#CA`).
 - When adding a gallery photo, the app posts the image with caption `#fun`.
+- A "Sharing code" button in the header lets users enter a code; when set and valid, photos are forwarded to Telegram. Without a code, the app still works locally but does not forward photos.
 
 ## Expose via ngrok
 
