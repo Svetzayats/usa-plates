@@ -216,22 +216,25 @@ async function handleSelectedFile(file, context) {
   const resizedBlob = await resizeImage(normalizedBlob, 1600);
 
   if (context === "state" && currentModalStateCode) {
-    await setStatePhoto(currentModalStateCode, resizedBlob);
+    const stateCode = currentModalStateCode;
+    const stateName = getStateNameByCode(stateCode);
+    await setStatePhoto(stateCode, resizedBlob);
 
     // Update UI
-    const card = document.querySelector(
-      `[data-state-code="${currentModalStateCode}"]`
-    );
-    if (card) await updateCardWithPhoto(card, currentModalStateCode);
+    const card = document.querySelector(`[data-state-code="${stateCode}"]`);
+    if (card) await updateCardWithPhoto(card, stateCode);
     await refreshStatesProgress();
-    closeModal();
 
     // Send to Telegram with caption as #<STATE_CODE>
     try {
-      await sendTelegramPhoto(resizedBlob, `#${currentModalStateCode}`);
+      const nameTag = stateName ? `#${toHashtagText(stateName)}` : "";
+      const caption = nameTag ? `#${stateCode} ${nameTag}` : `#${stateCode}`;
+      await sendTelegramPhoto(resizedBlob, caption);
     } catch (_) {
       // no-op on failure
     }
+
+    closeModal();
   }
 
   if (context === "gallery") {
@@ -345,6 +348,21 @@ function getStates() {
     { code: "WI", name: "Wisconsin" },
     { code: "WY", name: "Wyoming" },
   ];
+}
+
+function getStateNameByCode(code) {
+  console.log("code", code);
+  const upper = String(code || "").toUpperCase();
+  const match = getStates().find((s) => {
+    return s.code.toUpperCase() === upper;
+  });
+  return match ? match.name : null;
+}
+
+function toHashtagText(text) {
+  return String(text || "")
+    .trim()
+    .replace(/\s+/g, "");
 }
 
 // Image resize
