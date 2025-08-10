@@ -240,17 +240,19 @@ body {
   font-size: 18px;
 }
 .modal-body {
-  max-height: 60vh;
+  max-height: 85vh;
   overflow: auto;
 }
 .modal-preview {
   width: 100%;
-  aspect-ratio: 16/9;
+  /* Allow the image to define its own aspect ratio to fit the screen */
+  aspect-ratio: auto;
   border-radius: 12px;
   display: grid;
   place-items: center;
   color: var(--muted);
-  overflow: hidden;
+  /* Do not hide overflow in modal so full image can be viewed */
+  overflow: visible;
   position: relative;
 }
 .modal-preview::before {
@@ -272,6 +274,15 @@ body {
 .modal-preview.has-image::before {
   content: "";
   background: transparent;
+}
+/* Ensure the image in modal fits within the viewport without cropping */
+.modal-preview .thumb {
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 85vh;
+  object-fit: contain;
+  border-radius: 0;
 }
 .modal-actions {
   display: flex;
