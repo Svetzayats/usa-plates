@@ -94,6 +94,10 @@
         <h2 id="modalTitle" class="modal-title">Add plate photo</h2>
         <div class="modal-body">
           <div id="modalPreview" class="modal-preview"></div>
+          <div id="modalStatus" class="modal-status hidden" aria-live="polite">
+            <span class="spinner" aria-hidden="true"></span>
+            <span id="modalStatusText">Processing…</span>
+          </div>
         </div>
         <div class="modal-actions">
           <button id="modalReplaceBtn" class="btn btn-primary">

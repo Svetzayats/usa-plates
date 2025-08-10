@@ -256,7 +256,6 @@ body {
   position: relative;
 }
 .modal-preview::before {
-  content: "Plate preview";
   position: absolute;
   inset: 0;
   display: grid;
@@ -283,6 +282,26 @@ body {
   max-height: 85vh;
   object-fit: contain;
   border-radius: 0;
+}
+.modal-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  color: var(--muted);
+}
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #e5e7eb;
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 .modal-actions {
   display: flex;

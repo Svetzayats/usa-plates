@@ -192,6 +192,8 @@ async function openStateModal(state) {
   const modal = document.getElementById("modal");
   const modalTitle = document.getElementById("modalTitle");
   const modalPreview = document.getElementById("modalPreview");
+  const modalStatus = document.getElementById("modalStatus");
+  const modalStatusText = document.getElementById("modalStatusText");
   const replaceBtn = document.getElementById("modalReplaceBtn");
   const closeBtn = document.getElementById("modalCloseBtn");
   const backdrop = document.getElementById("modalBackdrop");
@@ -223,6 +225,10 @@ async function openStateModal(state) {
 
   modal.classList.remove("hidden");
   document.body.classList.add("no-scroll");
+
+  // Reset status UI
+  modalStatus.classList.add("hidden");
+  modalStatusText.textContent = "";
 }
 
 function closeModal() {
@@ -250,6 +256,10 @@ function openFilePicker(context) {
 }
 
 async function handleSelectedFile(file, context) {
+  const modalStatus = document.getElementById("modalStatus");
+  const modalStatusText = document.getElementById("modalStatusText");
+  modalStatusText.textContent = "Uploading photo…";
+  modalStatus.classList.remove("hidden");
   const normalizedBlob = await convertHeicIfNeeded(file);
   const resizedBlob = await resizeImage(normalizedBlob, 1600);
 
@@ -266,12 +276,21 @@ async function handleSelectedFile(file, context) {
     // Send to Telegram only if user has provided sharing code
     if (getShareCode()) {
       try {
+        modalStatusText.textContent = "Sending to Telegram…";
         const nameTag = stateName ? `#${toHashtagText(stateName)}` : "";
         const caption = nameTag ? `#${stateCode} ${nameTag}` : `#${stateCode}`;
         await sendTelegramPhoto(resizedBlob, caption);
       } catch (_) {
-        // no-op on failure
+        // Keep modal open and show brief error
+        modalStatusText.textContent = "Failed to send. Saved locally.";
+      } finally {
+        // Briefly show success then close
+        setTimeout(function onDone() {
+          closeModal();
+        }, 250);
       }
+    } else {
+      closeModal();
     }
 
     closeModal();
@@ -286,7 +305,7 @@ async function handleSelectedFile(file, context) {
       try {
         await sendTelegramPhoto(resizedBlob, "#fun");
       } catch (_) {
-        // no-op on failure
+        // no-op
       }
     }
   }
