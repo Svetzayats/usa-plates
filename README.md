@@ -18,6 +18,36 @@ A lightweight PWA game to collect photos of U.S. license plates by state. Mobile
 
    Server runs on `http://localhost:5173`.
 
+## Telegram integration
+
+Create a `.env` file in the project root with the following variables to enable auto-posting new photos to your Telegram channel/group:
+
+- `TELEGRAM_BOT_TOKEN`: Bot token from BotFather.
+- `TELEGRAM_CHAT_ID`: Target chat ID (channel username as `@channelname` or numeric ID for group/channel).
+- `API_JSON_LIMIT` (optional): JSON body limit for uploads, default `20mb`.
+
+`.env.example`:
+
+```
+# Telegram bot credentials
+TELEGRAM_BOT_TOKEN=123456:ABCDEF...
+TELEGRAM_CHAT_ID=@my_channel
+
+# Optional: increase JSON body size
+# API_JSON_LIMIT=20mb
+```
+
+Copy it to `.env`, edit values, then run:
+
+```bash
+npm run start
+```
+
+Behavior:
+
+- When adding a state photo, the app posts the image with caption `#<STATE_CODE>` (e.g., `#CA`).
+- When adding a gallery photo, the app posts the image with caption `#fun`.
+
 ## Expose via ngrok
 
 Expose your local server over the internet:

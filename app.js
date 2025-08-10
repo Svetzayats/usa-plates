@@ -225,11 +225,25 @@ async function handleSelectedFile(file, context) {
     if (card) await updateCardWithPhoto(card, currentModalStateCode);
     await refreshStatesProgress();
     closeModal();
+
+    // Send to Telegram with caption as #<STATE_CODE>
+    try {
+      await sendTelegramPhoto(resizedBlob, `#${currentModalStateCode}`);
+    } catch (_) {
+      // no-op on failure
+    }
   }
 
   if (context === "gallery") {
     await addGalleryPhoto(resizedBlob);
     await renderGallery();
+
+    // Send to Telegram with caption #fun
+    try {
+      await sendTelegramPhoto(resizedBlob, "#fun");
+    } catch (_) {
+      // no-op on failure
+    }
   }
 }
 
@@ -390,6 +404,40 @@ async function convertHeicIfNeeded(file) {
     // Fallback to original if conversion fails
   }
   return file;
+}
+
+// Network: Telegram
+async function sendTelegramPhoto(blob, caption) {
+  // Convert Blob to base64 to post to backend
+  const base64 = await blobToBase64(blob);
+  await fetch("/api/telegram/photo", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ imageBase64: base64, mimeType: blob.type, caption }),
+  });
+}
+
+function blobToBase64(blob) {
+  return new Promise(function executor(resolve, reject) {
+    const reader = new FileReader();
+    reader.onloadend = function onLoadEnd() {
+      const result = reader.result;
+      // result is a data URL like: data:image/jpeg;base64,XXXX
+      const commaIndex = typeof result === "string" ? result.indexOf(",") : -1;
+      if (typeof result === "string" && commaIndex !== -1) {
+        resolve(result.slice(commaIndex + 1));
+      } else if (typeof result === "string") {
+        // Fallback: try to strip prefix heuristically
+        resolve(result.replace(/^data:[^;]+;base64,/, ""));
+      } else {
+        reject(new Error("Failed to read blob"));
+      }
+    };
+    reader.onerror = function onError() {
+      reject(reader.error || new Error("FileReader error"));
+    };
+    reader.readAsDataURL(blob);
+  });
 }
 
 // IndexedDB layer
